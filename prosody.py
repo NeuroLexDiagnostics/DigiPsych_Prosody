@@ -43,15 +43,22 @@ class Voice_Prosody:
             feat_dict[feat_names[1] + '_VADInt_' + str(key)] = relevant_time
             pause_time = relevant_time - speech_time
             feat_dict[feat_names[2] + '_VADInt_' + str(key)] = pause_time
-            pause_percent = pause_time / relevant_time
+            if relevant_time == 0:
+                pause_percent = 0 #Deal with divide by 0 error
+            else:
+                pause_percent = pause_time / relevant_time
             feat_dict[feat_names[3] + '_VADInt_' + str(key)] = pause_percent
-            pause_sp_ratio = pause_time / speech_time
+            if speech_time == 0: #Deal with divide by 0 error
+                pause_sp_ratio = 0
+            else:
+                pause_sp_ratio = pause_time / speech_time
             feat_dict[feat_names[4] + '_VADInt_' + str(key)] = pause_sp_ratio
             mean_pause = self.meanPauseDuration(value,frame_ms)
             feat_dict[feat_names[5] + '_VADInt_' + str(key)] = mean_pause
             pause_var = self.pauseVariability(value,frame_ms)
             feat_dict[feat_names[6] + '_VADInt_' + str(key)] = pause_var
-        return vad_dict
+        feat_dict['AudioFile'] = audioFile.split('/')[-1]
+        return feat_dict
 
     def preproc_audio(self,audioFile,frame_ms):
         '''
@@ -85,6 +92,8 @@ class Voice_Prosody:
         '''
         Returns Total Speech Time
         '''
+        if 'True' not in list(v_dict.values()):
+            return 0
         tot_time = list(v_dict.values()).count('True') * frame_ms / 1000
         return tot_time
 
@@ -94,6 +103,8 @@ class Voice_Prosody:
         '''
         keys = list(v_dict.keys())
         values = list(v_dict.values())
+        if 'True' not in values:
+            return 0
         f_ind = values.index('True')
         l_ind = len(values) - 1 - values[::-1].index('True')
         tot_time = keys[l_ind] + float(frame_ms)/1000 - keys[f_ind]
@@ -111,6 +122,7 @@ class Voice_Prosody:
             pause =float(len(list(map(itemgetter(1), g)))) * float(frame_ms) / 1000
             pauses.append(pause)
         return pauses
+
     def meanPauseDuration(self,v_dict,frame_ms):
         '''
         Calculate Mean Pause Duration:
@@ -118,6 +130,8 @@ class Voice_Prosody:
         - Average by number of pauses.
         '''
         pauses = self.calculate_pauses(v_dict,frame_ms)
+        if len(pauses) == 0: #Account for cases where there are no pauses
+            return 0
         mean_pause = np.average(pauses)
         return mean_pause
 
@@ -128,13 +142,14 @@ class Voice_Prosody:
         - np.var(array)
         '''
         pauses = self.calculate_pauses(v_dict,frame_ms)
+        if len(pauses) == 0: #Account for cases where there are no pauses
+            return 0
         pause_var = np.var(pauses)
         return pause_var
 
 def main():
     pros = Voice_Prosody()
     path = '/home/lazhang/UW_Projects/MHA_Data/AllAudio'
-
-    pros.featurize_audio(os.path.join(path,'NLX-1527883573725426010-1527883619077.wav'),20)
+    print(pros.featurize_audio(os.path.join(path,'NLX-1527883573725426010-1527883619077.wav'),20))
 if __name__ == '__main__':
     main()
