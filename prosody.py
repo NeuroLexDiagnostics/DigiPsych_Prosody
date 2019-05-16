@@ -130,7 +130,7 @@ class Voice_Prosody:
         - Average by number of pauses.
         '''
         pauses = self.calculate_pauses(v_dict,frame_ms)
-        if len(pauses) == 0: #Account for cases where there are no pauses
+        if len(pauses) == 0 or len(pauses) == 1: #Account for cases where there are no pauses, or empty file
             return 0
         mean_pause = np.average(pauses)
         return mean_pause
@@ -142,7 +142,7 @@ class Voice_Prosody:
         - np.var(array)
         '''
         pauses = self.calculate_pauses(v_dict,frame_ms)
-        if len(pauses) == 0: #Account for cases where there are no pauses
+        if len(pauses) == 0 or len(pauses) == 1: #Account for cases where there are no pauses, or empty file
             return 0
         pause_var = np.var(pauses)
         return pause_var
