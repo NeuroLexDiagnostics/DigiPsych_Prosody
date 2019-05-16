@@ -2,12 +2,11 @@ import collections
 import contextlib
 import sys
 import wave
-
 import webrtcvad
 
 '''
-vad_helper.py takes the code from https://github.com/wiseman/py-webrtcvad/blob/master/example.py 
-directly. 
+vad_helper.py takes the code from https://github.com/wiseman/py-webrtcvad/blob/master/example.py
+directly.
 The methods created in example.py are leveraged immediately by prosody.py. All credit
 for functions in this python program are credited to wiseman's implementation of py-webrtcvad
 
@@ -134,4 +133,3 @@ def vad_collector(sample_rate, frame_duration_ms,
     # yield it.
     if voiced_frames:
         yield b''.join([f.bytes for f in voiced_frames])
-
